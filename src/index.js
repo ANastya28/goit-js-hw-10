@@ -1,71 +1,73 @@
+import { fetchBreeds, fetchCatByBreed } from "./cat-api";
 import Notiflix from 'notiflix';
 import SlimSelect from 'slim-select';
-import getRefs from './get-refs';
-import { fetchBreeds, fetchCatByBreed } from "./cat-api";
+import 'slim-select/dist/slimselect.css';
 
-// import axios from "axios";
+const refs = {
+    selector: document.querySelector('.breed-select'),
+    divCatInfo: document.querySelector('.cat-info'),
+    loader: document.querySelector('.loader'),
+    error: document.querySelector('.error'),
+};
 
-// axios.defaults.headers.common["x-api-key"] = "live_Q9MwHdsjBD6qANkYqO01LZ5ibm2qoWRo7CQnkI4r4DnwicEZq7oWipcb1yn21vVG";
-const refs = getRefs();
+const { selector, divCatInfo, loader, error } = refs;
 
-refs.selector.addEventListener('change', onSeachSelect);
+loader.classList.replace('loader', 'is-hidden');
+error.classList.add('is-hidden');
+divCatInfo.classList.add('is-hidden');
 
-function onSeachSelect(event) {
-  loaderEl.classList.remove('unvisible');
-  divPictEl.innerHTML = '';
-  divDescEl.innerHTML = '';
-  const breedId = event.target.value;
-  console.log('breedId: ', breedId);
+let arrBreedsId = [];
+
+fetchBreeds()
+.then(data => {
+  data.forEach(element => {
+  arrBreedsId.push({text: element.name, value: element.id});
+  });
+
+  new SlimSelect({
+    select: selector,
+    data: arrBreedsId
+  });
+})
+.catch(onFetchError);
+
+selector.addEventListener('change', onSelectBreed);
+
+function onSelectBreed(event) {
+  loader.innerHTML = '';
+  loader.classList.replace('is-hidden', 'loader');
+  selector.classList.add('is-hidden');
+  divCatInfo.classList.add('is-hidden');
+
+  const breedId = event.currentTarget.value;
   fetchCatByBreed(breedId)
-    .then(breed => renderBreedDesc(breed))
-    // .then(breed => console.log(breed))
-    .catch(error => {
-      console.log(error);
-      Notiflix.Notify.failure(
-        'Oops! Something went wrong! Try reloading the page!'
-      );
+  .then(data => {
+  loader.classList.replace('loader', 'is-hidden');
+  selector.classList.remove('is-hidden');
+  const { url, breeds } = data[0];
+        
+  divCatInfo.innerHTML = `<img src="${url}" alt="${breeds[0].name}" width="400"/>
+    <div class="description">
+    <h1>${breeds[0].name}</h1>
+    <p>${breeds[0].description}</p>
+    <p><b>Temperament:</b> ${breeds[0].temperament}</p>
+    </div>`
+    divCatInfo.classList.remove('is-hidden');
     })
-    .finally(() => loaderEl.classList.add('unvisible'));
-}
-const fetchAndRenderBreeds = () => {
-  loaderEl.classList.remove('unvisible');
-  fetchBreeds()
-    // .then(breeds => console.log(breeds))
-    .then(breeds => renderBreedsSelect(breeds))
-    .catch(error => {
-      console.log(error);
-      Notiflix.Notify.failure(
-        'Oops! Something went wrong! Try reloading the page!'
-      );
-    })
-    .finally(() => {
-      loaderEl.classList.add('unvisible');
-      breedSelect.classList.remove('unvisible');
+  .catch(onFetchError);
+};
+
+function onFetchError(error) {
+  selector.classList.remove('is-hidden');
+  loader.classList.replace('loader', 'is-hidden');
+
+  Notiflix.Notify.failure('Oops! Something went wrong! Try reloading the page!', {
+    position: 'center-center',
+    timeout: 5000,
+    width: '400px',
+    fontSize: '24px'
     });
 };
 
-fetchAndRenderBreeds();
-
-const renderBreedsSelect = breeds => {
-  const markup = breeds
-    .map(breed => {
-      return `<option value="${breed.reference_image_id}">${breed.name}</option>`;
-    })
-    .join('');
-  breedSelect.insertAdjacentHTML('beforeend', markup);
-
-  new SlimSelect({
-    select: '#single',
-  });
-};
-
-const renderBreedDesc = breed => {
-  const markupPicture = `<img class="cat-picture" src="${breed.url}" alt="${breed.id}">`;
-  const markupDescript = `<h2 class="cat-info-desc-title">${breed.breeds[0].name}</h2>
-    <p class="cat-info-desc-desc">${breed.breeds[0].description}</p>
-    <p class="cat-info-desc-temp"><b>Temperament:</b> ${breed.breeds[0].temperament}</p>`;
-  divPictEl.insertAdjacentHTML('beforeend', markupPicture);
-  divDescEl.insertAdjacentHTML('beforeend', markupDescript);
-};
 
 
