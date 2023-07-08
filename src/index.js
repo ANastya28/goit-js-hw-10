@@ -62,11 +62,7 @@ function onFetchError(error) {
   loader.classList.replace('loader', 'is-hidden');
 
   Notiflix.Notify.failure('Oops! Something went wrong! Try reloading the page!', {
-    position: 'center-center',
-    timeout: 5000,
-    width: '400px',
-    fontSize: '24px'
-    });
+    position: 'center-center'});
 };
 
 

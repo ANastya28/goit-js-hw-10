@@ -22,6 +22,9 @@ export function fetchCatByBreed(breedId) {
   });
 };
 
+
+
+
 // const BASE_URL = 'https://api.thecatapi.com/v1';
 // const API_KEY = 'live_Q9MwHdsjBD6qANkYqO01LZ5ibm2qoWRo7CQnkI4r4DnwicEZq7oWipcb1yn21vVG';
 
