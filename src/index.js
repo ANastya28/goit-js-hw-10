@@ -15,21 +15,21 @@ const { selector, divCatInfo, loader, error } = refs;
 loader.classList.replace('loader', 'is-hidden');
 error.classList.add('is-hidden');
 divCatInfo.classList.add('is-hidden');
-
-let arrBreedsId = [];
+selector.classList.replace('breed-select', 'is-hidden');
 
 fetchBreeds()
-.then(data => {
-  data.forEach(element => {
-  arrBreedsId.push({text: element.name, value: element.id});
-  });
-
-  new SlimSelect({
-    select: selector,
-    data: arrBreedsId
+  .then(data => {
+    const markup = data.map(({id,name}) => `<option value="${id}">${name}</option>`)
+   .join();
+    selector.innerHTML = markup;
+    
+    selector.classList.replace('is-hidden', 'breed-select');
+    
+    new SlimSelect({
+    select: '.breed-select',
   });
 })
-.catch(onFetchError);
+  .catch(onFetchError);    
 
 selector.addEventListener('change', onSelectBreed);
 
