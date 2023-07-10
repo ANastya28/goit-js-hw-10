@@ -33,6 +33,10 @@ fetchBreeds()
 
 selector.addEventListener('change', onSelectBreed);
 
+Notiflix.Notify.success('Choose your cat', {
+  position: 'center-center'
+});
+    
 function onSelectBreed(event) {
   loader.innerHTML = '';
   loader.classList.replace('is-hidden', 'loader');
